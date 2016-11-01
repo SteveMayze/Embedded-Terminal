@@ -30,9 +30,9 @@ static uint_fast8_t Initialize( FIFOQueue *queue ) {
 	    for(int i = 0; i < MAXQUEUESIZE; i++){
 	    	queue->items[i] = 0;
 	    }
-	    return TRUE;
+	    return (uint_fast8_t)Serial_ReturnState_OK;
 	}
-	return INVALID_POINTER_ERROR;
+	return (uint_fast8_t)Serial_ReturnState_InvalidPointer;
 
 }
 
@@ -57,13 +57,13 @@ static uint_fast8_t Insert(FIFOQueue *queue, const uint8_t byte){
 		// Check of overflow
 		if(queue->rear == queue->front) {
 			queue->rear = tempData; // Roll-back the insert
-			return FALSE;	// Overflow
+			return (uint_fast8_t)Serial_ReturnState_BufferOverflow;	// Overflow
 		}
 
 		queue->items[queue->rear] = byte;
 		return TRUE;
 	}
-	return INVALID_POINTER_ERROR;
+	return (uint_fast8_t)Serial_ReturnState_InvalidPointer;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -81,17 +81,17 @@ static uint_fast8_t Remove( FIFOQueue *queue, uint8_t *dest ){
 
 	if( queue && dest ){ // Check that the pointer to the destination is valid
 		if( queue->front == queue->rear )
-			return FALSE;	// Underflow
+			return (uint_fast8_t)Serial_ReturnState_BufferEmpty;	// Underflow
 
 		if( MAXQUEUESIZE-1 == queue->front )
 			queue->front = 0;
 		else
 			(queue->front)++;
 		*dest = queue->items[queue->front];
-		return TRUE;
+		return (uint_fast8_t)Serial_ReturnState_OK;
 	}
 
-	return INVALID_POINTER_ERROR;
+	return (uint_fast8_t)Serial_ReturnState_InvalidPointer;
 }
 
 

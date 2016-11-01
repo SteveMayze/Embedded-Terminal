@@ -214,14 +214,14 @@ int_fast8_t DoesReceiveBufferHaveData(void)
 ///										or if the data is corrupted (ie, framing error or buffer overflow)
 ///				INVALID_POINTER_ERROR = Invalid pointer
 ///////////////////////////////////////////////////////////////////////////////
-static int_fast8_t GetByte(uint8_t *destination) {
+//static int_fast8_t GetByte(uint8_t *destination) {
+int_fast8_t USART2_GetByte(uint8_t *destination) {
 	if(IsOpenFlag) {
 		if (destination) {
 			return FIFO.Remove(&queue, destination);
 		}
 	}
-	return FALSE;
-
+	return (int_fast8_t)Serial_ReturnState_BufferEmpty;
 }
 
 static inline void handleInterrupt(void)
@@ -330,5 +330,5 @@ SerialInterface SerialPort2 = {
                                     SendString,
                                     SendArray,
                                     DoesReceiveBufferHaveData,
-                                    GetByte
+                                    USART2_GetByte
                                 };

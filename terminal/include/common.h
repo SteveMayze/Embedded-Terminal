@@ -29,6 +29,21 @@
 	/////////////////////////////////////////////////////////////////////////
 	#define INVALID_POINTER_ERROR 	-3
 
+
+	/////////////////////////////////////////////////////////////////////////
+	///	\brief	Defines the return states for the USART2 and FIFO
+	/////////////////////////////////////////////////////////////////////////
+    typedef enum {
+	   Serial_ReturnState_OK,
+	   Serial_RetrunState_PortNotOpenError,
+	   Serial_ReturnState_InvalidPointer,
+	   Serial_ReturnState_BufferEmpty,
+	   Serial_ReturnState_BufferOverflow
+    } usart2_ReturnStates;
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
     /// \brief Firmware version
     /// D = development version of the firmware. Should only be used for testing purposes

@@ -28,6 +28,12 @@
     - -:test/support
   :include:
     - ../terminal/include/**
+    - ../terminal/include/MCU/**
+    - ../terminal/include/LIST/**
+    - ../terminal/include/TERMINAL/**
+    - ../terminal/system/include/cmsis/**
+    - ../terminal/system/include/stm32f0-stdperiph/**
+    - test/**
   :source:
     - ../terminal/src/**
   :support:
@@ -71,4 +77,5 @@
   :enabled:
     - stdout_pretty_tests_report
     - module_generator
+    - fake_function_framework
 ...

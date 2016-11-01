@@ -9,6 +9,8 @@
 	#include "common.h"
     #include "MCU/SerialStructure.h"
 
+    int_fast8_t USART2_GetByte(uint8_t *destination);
+
     extern SerialInterface SerialPort2;
 
 #endif
