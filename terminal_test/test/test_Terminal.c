@@ -1,5 +1,6 @@
 #include "unity.h"
 #include "fff.h"
+#include "common.h"
 #include "Terminal.h"
 #include "Terminal_Buffer.h"
 #include "cmsis_device.h"
@@ -39,6 +40,23 @@ void test_ReadSerialToBuffer_WhiteSpaceReturned(void){
   Terminal_ReturnStates result = Terminal_ReadFromSerialBuffer( &ch );
 
   TEST_ASSERT_EQUAL_INT( ' ', ch );
+  TEST_ASSERT_TRUE( isspace( ch ));
+  TEST_ASSERT_EQUAL_INT( Terminal_ReturnState_IsWhiteSpace, result );
+
+}
+
+void test_ReadSerialToBuffer_TabReturnedAsWhiteSpace(void){
+  uint8_t ch;
+
+  int_fast8_t Delegate_USART2_GetByte( uint8_t *ch ) {
+     *ch = '\t';
+     return (int_fast8_t)Serial_ReturnState_OK;
+  }
+
+  USART2_GetByte_fake.custom_fake = Delegate_USART2_GetByte;
+  Terminal_ReturnStates result = Terminal_ReadFromSerialBuffer( &ch );
+
+  TEST_ASSERT_EQUAL_INT( '\t', ch );
   TEST_ASSERT_TRUE( isspace( ch ));
   TEST_ASSERT_EQUAL_INT( Terminal_ReturnState_IsWhiteSpace, result );
 
@@ -95,48 +113,177 @@ void test_ReadSerialToBuffer_SerialError(void){
 
 }
 
-extern Terminal_ReturnStates Terminal_AddCharToToken(TerminalBuffer *buffer, uint8_t ch);
+extern Terminal_ReturnStates Terminal_ReadSerialToCommandBuffer(TerminalBuffer *buffer);
 
-/////////////////////////////////////////////////////////////////////
-/// \brief Add ch to Token Test
-/////////////////////////////////////////////////////////////////////
-void test_AddChToToken_DefaultScenario(void){
+
+void test_WhenWhiteSpaceIsEncountered_thenNewToken(){
+
   TerminalBuffer buffer;
-  Terminal_BufferInitialise(&buffer);
+  TerminalBuffer_Initialise( &buffer );
 
-  TEST_ASSERT_EQUAL_INT(0, buffer.tokenId);
-  TEST_ASSERT_EQUAL_INT(0, buffer.idx);
+  int idx = 0;
+  char *sample = "   ABC   XYZ";
 
-  Terminal_ReturnStates result = Terminal_AddCharToToken( &buffer, 'A');
+  int_fast8_t Delegate_USART2_GetByte( uint8_t *ch ) {
+    int_fast8_t result = (int_fast8_t) Serial_ReturnState_OK;
+    if( sample[idx] != 0) {
+      *ch = sample[idx++];
+    } else {
+      result = (int_fast8_t)Serial_ReturnState_BufferEmpty;
+    }
+    return result;
+  }
+  USART2_GetByte_fake.custom_fake = Delegate_USART2_GetByte;
 
-  TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_OK, result);
+  Terminal_ReturnStates result = Terminal_ReadSerialToCommandBuffer(&buffer);
 
-  TEST_ASSERT_EQUAL_INT(0, buffer.tokenId);
-  TEST_ASSERT_EQUAL_INT(1, buffer.idx);
-  TEST_ASSERT_EQUAL_INT('A', buffer.tokenBuffer[0][0]);
-
-  Terminal_AddCharToToken( &buffer, 'B');
-
-  TEST_ASSERT_EQUAL_INT(0, buffer.tokenId);
-  TEST_ASSERT_EQUAL_INT(2, buffer.idx);
-  TEST_ASSERT_EQUAL_INT('B', buffer.tokenBuffer[0][1]);
+  TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_Pending, result);
+  TEST_ASSERT_EQUAL_INT(1, buffer.tokenId);
+  TEST_ASSERT_EQUAL_STRING("ABC", buffer.tokenBuffer[0]);
+  TEST_ASSERT_EQUAL_STRING("XYZ", buffer.tokenBuffer[1]);
 
 }
 
 
-void test_AddChToToken_TokenTooBig(void) {
-   TerminalBuffer buffer;
+void test_WhenReadingTokens_WhitespaceIsIgnored(){
 
-   uint8_t sample[TOKEN_LIST_SIZE][TOKEN_SIZE]  = {65,66,67,68,69,70,71,72,73,74};
+  TerminalBuffer buffer;
+  TerminalBuffer_Initialise( &buffer );
 
-   uint_fast8_t i;
-   for(i = 0; i < TOKEN_SIZE; i++){
-     buffer.tokenBuffer[0][i] = sample[0][i];
-   }
-   buffer.tokenId = 0;
-   buffer.idx = 9;
+  int idx = 0;
+  char *sample = "   ABC   XYZ";
 
-   Terminal_ReturnStates result = Terminal_AddCharToToken( &buffer, 'J');
-   TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_TokenTooBig, result);
+  int_fast8_t Delegate_USART2_GetByte( uint8_t *ch ) {
+    int_fast8_t result = (int_fast8_t) Serial_ReturnState_OK;
+    if( sample[idx] != 0) {
+      *ch = sample[idx++];
+    } else {
+      result = (int_fast8_t)Serial_ReturnState_BufferEmpty;
+    }
+    return result;
+  }
+  USART2_GetByte_fake.custom_fake = Delegate_USART2_GetByte;
+
+  Terminal_ReturnStates result = Terminal_ReadSerialToCommandBuffer(&buffer);
+
+  TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_Pending, result);
+  TEST_ASSERT_EQUAL_INT(1, buffer.tokenId);
+  TEST_ASSERT_EQUAL_STRING("ABC", buffer.tokenBuffer[0]);
+  TEST_ASSERT_EQUAL_STRING("XYZ", buffer.tokenBuffer[1]);
+
+}
+
+
+
+void test_WhenReadingTokens_WhitespaceIsIgnored2(){
+
+  TerminalBuffer buffer;
+  TerminalBuffer_Initialise( &buffer );
+
+  int idx = 0;
+  char *sample = "  \t ABC  \t XYZ   ";
+
+  int_fast8_t Delegate_USART2_GetByte( uint8_t *ch ) {
+    int_fast8_t result = (int_fast8_t) Serial_ReturnState_OK;
+    if( sample[idx] != 0) {
+      *ch = sample[idx++];
+    } else {
+      result = (int_fast8_t)Serial_ReturnState_BufferEmpty;
+    }
+    return result;
+  }
+  USART2_GetByte_fake.custom_fake = Delegate_USART2_GetByte;
+
+  Terminal_ReturnStates result = Terminal_ReadSerialToCommandBuffer(&buffer);
+
+  TEST_ASSERT_EQUAL_INT(1, buffer.tokenId);
+  TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_Pending, result);
+  TEST_ASSERT_EQUAL_STRING("ABC", buffer.tokenBuffer[0]);
+  TEST_ASSERT_EQUAL_STRING("XYZ", buffer.tokenBuffer[1]);
+
+}
+
+void test_WhenReadingTokens_MoreTokensThrowsError(){
+
+  TerminalBuffer buffer;
+  TerminalBuffer_Initialise( &buffer );
+
+  int idx = 0;
+  char *sample = "ABC  \t XYZ   GHI ";
+
+  int_fast8_t Delegate_USART2_GetByte( uint8_t *ch ) {
+    int_fast8_t result = (int_fast8_t) Serial_ReturnState_OK;
+    if( sample[idx] != 0) {
+      *ch = sample[idx++];
+    } else {
+      result = (int_fast8_t)Serial_ReturnState_BufferEmpty;
+    }
+    return result;
+  }
+  USART2_GetByte_fake.custom_fake = Delegate_USART2_GetByte;
+
+  Terminal_ReturnStates result = Terminal_ReadSerialToCommandBuffer(&buffer);
+
+  TEST_ASSERT_EQUAL_INT(1, buffer.tokenId);
+  TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_TokenOverFlow, result);
+  TEST_ASSERT_EQUAL_STRING("ABC", buffer.tokenBuffer[0]);
+  TEST_ASSERT_EQUAL_STRING("XYZ", buffer.tokenBuffer[1]);
+
+}
+
+
+void test_WhenReadingTokens_LargeTokensWillThrowAnError(){
+
+  TerminalBuffer buffer;
+  TerminalBuffer_Initialise( &buffer );
+
+  int idx = 0;
+  char *sample = "ABC  \t DEFGHIJKLMN ";
+
+  int_fast8_t Delegate_USART2_GetByte( uint8_t *ch ) {
+    int_fast8_t result = (int_fast8_t) Serial_ReturnState_OK;
+    if( sample[idx] != 0) {
+      *ch = sample[idx++];
+    } else {
+      result = (int_fast8_t)Serial_ReturnState_BufferEmpty;
+    }
+    return result;
+  }
+  USART2_GetByte_fake.custom_fake = Delegate_USART2_GetByte;
+
+  Terminal_ReturnStates result = Terminal_ReadSerialToCommandBuffer(&buffer);
+
+  TEST_ASSERT_EQUAL_INT(1, buffer.tokenId);
+  TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_TokenTooBig, result);
+  TEST_ASSERT_EQUAL_STRING("ABC", buffer.tokenBuffer[0]);
+  TEST_ASSERT_EQUAL_STRING("DEFGHIJKL", buffer.tokenBuffer[1]);
+
+}
+
+void test_WhenReadingTokens_CRWillCompleteTheCommand(){
+
+  TerminalBuffer buffer;
+  TerminalBuffer_Initialise( &buffer );
+
+  int idx = 0;
+  char *sample = "  \t ABC  \t XYZ  \n ";
+
+  int_fast8_t Delegate_USART2_GetByte( uint8_t *ch ) {
+    int_fast8_t result = (int_fast8_t) Serial_ReturnState_OK;
+    if( sample[idx] != 0) {
+      *ch = sample[idx++];
+    } else {
+      result = (int_fast8_t)Serial_ReturnState_BufferEmpty;
+    }
+    return result;
+  }
+  USART2_GetByte_fake.custom_fake = Delegate_USART2_GetByte;
+
+  Terminal_ReturnStates result = Terminal_ReadSerialToCommandBuffer(&buffer);
+
+  TEST_ASSERT_EQUAL_INT(1, buffer.tokenId);
+  TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_OK, result);
+  TEST_ASSERT_EQUAL_STRING("ABC", buffer.tokenBuffer[0]);
+  TEST_ASSERT_EQUAL_STRING("XYZ", buffer.tokenBuffer[1]);
 
 }

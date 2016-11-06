@@ -44,6 +44,23 @@
 
 
 
+	/////////////////////////////////////////////////////////////////////////
+	///	\brief	Defines the return states for the Terminal and Terminal_Buffer
+	/////////////////////////////////////////////////////////////////////////
+    typedef enum Terminal_ReturnStates_Type {
+    	Terminal_ReturnState_OK,
+    	Terminal_ReturnState_NoMoreData,
+    	Terminal_ReturnState_IsWhiteSpace,
+    	Terminal_ReturnState_IsCarriageReturn,
+    	Terminal_ReturnState_Pending,
+    	Terminal_ReturnState_SerialError,
+    	Terminal_ReturnState_TokenTooBig,
+    	Terminal_ReturnState_TokenOverFlow
+
+    } Terminal_ReturnStates;
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
     /// \brief Firmware version
     /// D = development version of the firmware. Should only be used for testing purposes
