@@ -55,7 +55,12 @@
     	Terminal_ReturnState_Pending,
     	Terminal_ReturnState_SerialError,
     	Terminal_ReturnState_TokenTooBig,
-    	Terminal_ReturnState_TokenOverFlow
+    	Terminal_ReturnState_TokenOverFlow,
+		Terminal_ReturnState_BadPort,
+		Terminal_ReturnState_BadPin,
+		Terminal_ReturnState_BadType,
+		Terminal_ReturnState_InvalidValue
+
 
     } Terminal_ReturnStates;
 

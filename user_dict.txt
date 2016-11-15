@@ -1,2 +1,4 @@
 param
 intialises
+cmd
+initialises
