@@ -2,3 +2,5 @@ param
 intialises
 cmd
 initialises
+initialise
+enum

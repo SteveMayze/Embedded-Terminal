@@ -14,11 +14,13 @@
 /// \brief
 ///////////////////////////////////////////////////////////////////////
 typedef enum Terminal_DataTypes {
+	Terminal_Null,
 	Terminal_Decimal_Type,
 	Terminal_Unsigned_Type,
 	Terminal_Binary_Type,
 	Terminal_Hexadecimal_Type
 } Terminal_DataType;
+
 
 ///////////////////////////////////////////////////////////////////////
 /// \brief
@@ -36,7 +38,7 @@ typedef struct {
 /// \brief Initialises the TerminalCommand structure so it can be used.
 /// \param TerminalCommand *cmd - The pointer to the TerminalCommand to initialise.
 ///////////////////////////////////////////////////////////////////////
-void TerminalCommand_Initialise( TerminalCommand *cmd);
+void TerminalCommand_Initialise(TerminalCommand *cmd);
 
 ///////////////////////////////////////////////////////////////////////
 /// \brief Sets the PORT value on the command
@@ -46,7 +48,8 @@ void TerminalCommand_Initialise( TerminalCommand *cmd);
 /// \return Terminal_ReturnState_OK
 ///	Terminal_ReturnState_BadPort
 ///////////////////////////////////////////////////////////////////////
-Terminal_ReturnStates TerminalCommand_setPort( TerminalCommand *cmd, uint8_t port);
+Terminal_ReturnStates TerminalCommand_setPort(TerminalCommand *cmd,
+		uint8_t port);
 
 ///////////////////////////////////////////////////////////////////////
 /// \brief Sets the designated pin# to the pin field of the command.
@@ -56,17 +59,18 @@ Terminal_ReturnStates TerminalCommand_setPort( TerminalCommand *cmd, uint8_t por
 /// \return Terminal_ReturnState_OK
 ///	Terminal_ReturnState_BadPin
 ///////////////////////////////////////////////////////////////////////
-Terminal_ReturnStates TerminalCommand_setPin( TerminalCommand *cmd, uint8_t pin);
+Terminal_ReturnStates TerminalCommand_setPin(TerminalCommand *cmd, uint8_t pin);
 
 ///////////////////////////////////////////////////////////////////////
-/// \brief Sets the datatype of the value for the command.
+/// \brief Sets the data-type of the value for the command.
 /// \param TerminalCommand *cmd - The pointer to the TerminalCommand to initialise.
 /// \param uint8_t
 ///
 /// \return Terminal_ReturnState_OK
 ///	Terminal_ReturnState_BadType
 ///////////////////////////////////////////////////////////////////////
-Terminal_ReturnStates TerminalCommand_setType( TerminalCommand *cmd, Terminal_DataType type);
+Terminal_ReturnStates TerminalCommand_setType(TerminalCommand *cmd,
+		Terminal_DataType type);
 
 ///////////////////////////////////////////////////////////////////////
 /// \brief Adds an element to the value. The order of the digits to be
@@ -77,7 +81,7 @@ Terminal_ReturnStates TerminalCommand_setType( TerminalCommand *cmd, Terminal_Da
 /// \return Terminal_ReturnState_OK
 ///	Terminal_ReturnState_InvalidValue
 ///////////////////////////////////////////////////////////////////////
-Terminal_ReturnStates TerminalCommand_addValueElement( TerminalCommand *cmd, uint8_t ch);
-
+Terminal_ReturnStates TerminalCommand_addValueElement(TerminalCommand *cmd,
+		uint8_t ch);
 
 #endif /* INCLUDE_TERMINAL_TERMINAL_COMMAND_H_ */

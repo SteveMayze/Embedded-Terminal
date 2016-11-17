@@ -95,3 +95,45 @@ Terminal_ReturnStates Terminal_ReadSerialToCommandBuffer(TerminalBuffer *buffer)
 
 	return result;
 }
+
+
+///////////////////////////////////////////////////////////////////////
+/// \brief Parses the OPERATION token to determine the PORT and PIN assignment
+/// \param char* operation - The String token to be parsed
+/// \param TerminalCommand *cmd - The Command structure that will take the PORT and PIN assignments
+///
+/// \return Terminal_ReturnState_OK, Terminal_ReturnState_InvalidPort,
+///         Terminal_ReturnState_InvalidPin
+///////////////////////////////////////////////////////////////////////
+Terminal_ReturnStates Terminal_ParseOperation(char *operation, TerminalCommand *cmd) {
+	Terminal_ReturnStates result = Terminal_ReturnState_OK;
+
+	return result;
+}
+
+///////////////////////////////////////////////////////////////////////
+/// \brief Parses the ARGUMENT token to determine the data type and to
+///        extract the value.
+/// \param  char *argument
+/// \param TerminalCommand *cmd
+///
+/// \return Terminal_ReturnState_OK, Terminal_ReturnState_InvalidType,
+///         Terminal_ReturnState_TypeNotSet, Terminal_ReturnState_InvalidValue,
+///         Terminal_ReturnState_MemoryError
+///////////////////////////////////////////////////////////////////////
+Terminal_ReturnStates Terminal_ParseArgument(char *argument, TerminalCommand *cmd) {
+	Terminal_ReturnStates result = Terminal_ReturnState_OK;
+
+	return result;
+}
+
+///////////////////////////////////////////////////////////////////////
+/// \brief
+///////////////////////////////////////////////////////////////////////
+Terminal_ReturnStates Terminal_ParseCommandBuffer(TerminalBuffer *buffer, TerminalCommand *cmd) {
+
+	Terminal_ReturnStates result = Terminal_ReturnState_OK;
+
+	return result;
+
+}
