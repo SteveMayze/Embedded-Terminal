@@ -16,10 +16,13 @@ typedef struct {
 	uint8_t tokenId;
 	uint8_t idx;
 	uint8_t inToken;
+	uint8_t size;
 
 } TerminalBuffer;
 
-void Terminal_BufferInitialise(TerminalBuffer *cmdBuffer);
+void TerminalBuffer_Initialise(TerminalBuffer *cmdBuffer);
+
+Terminal_ReturnStates TerminalBuffer_ReadFromSerialBuffer(uint8_t *byte);
 
 Terminal_ReturnStates TerminalBuffer_AddCharToToken(TerminalBuffer *buffer,
 		uint8_t ch) ;

@@ -1,46 +1,25 @@
+#include "common.h"
 #include "TERMINAL/Terminal.h"
 #include "MCU/usart2.h"
 #include "stdbool.h"
+#include "ctype.h"
+#include "stdlib.h"
+#include "string.h"
 
+#define LEXICAL_PORT (uint_fast8_t)0
+#define LEXICAL_PIN (uint_fast8_t)1
+#define LEXICAL_TYPE (uint_fast8_t)2
+#define LEXICAL_VALUE (uint_fast8_t)3
+#define LEXICAL_END (uint_fast8_t)4
 
 ///////////////////////////////////////////////////////////////////////
-/// \brief Reads a character from the serial buffer
+/// \brief Initialises the command buffer and command structures
 /// \param byte: uint8_t
 ///
-/// \return Terminal_ReturnStates Terminal_ReturnState_OK on normal
-/// execution. For special cases, other states are returned
-/// Terminal_ReturnState_SerialError: For serial related errors
-/// Terminal_ReturnState_NoMoreData: For no more data available in
-/// the serial buffer.
-/// Terminal_ReturnState_IsWhiteSpace: where white space is detected
-/// other than carriage return
-/// Terminal_ReturnState_IsCarriageReturn: When carriage return is detected.
 ///////////////////////////////////////////////////////////////////////
-Terminal_ReturnStates Terminal_ReadFromSerialBuffer(uint8_t *byte) {
-
-	int_fast8_t serial_result = USART2_GetByte(byte);
-	Terminal_ReturnStates result = Terminal_ReturnState_OK;
-
-	switch (serial_result) {
-	case Serial_ReturnState_OK:
-		if ('\n' == *byte) {
-			result = Terminal_ReturnState_IsCarriageReturn;
-		} else if (isspace(*byte)) {
-			result = Terminal_ReturnState_IsWhiteSpace;
-		}
-		break;
-	case Serial_RetrunState_PortNotOpenError:
-	case Serial_ReturnState_InvalidPointer:
-	case Serial_ReturnState_BufferOverflow:
-		result = Terminal_ReturnState_SerialError;
-		break;
-	case Serial_ReturnState_BufferEmpty:
-		result = Terminal_ReturnState_NoMoreData;
-		break;
-	default:
-		break;
-	}
-	return result;
+void Terminal_Initialise(TerminalBuffer *cmdBuffer, TerminalCommand *cmd) {
+	TerminalBuffer_Initialise(cmdBuffer);
+	TerminalCommand_Initialise(cmd);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -61,7 +40,7 @@ Terminal_ReturnStates Terminal_ReadSerialToCommandBuffer(TerminalBuffer *buffer)
 	bool moreData = true;
 
 	do {
-		result = Terminal_ReadFromSerialBuffer(&ch);
+		result = TerminalBuffer_ReadFromSerialBuffer(&ch);
 		switch (result) {
 		case Terminal_ReturnState_SerialError:
 			break;
@@ -96,7 +75,6 @@ Terminal_ReturnStates Terminal_ReadSerialToCommandBuffer(TerminalBuffer *buffer)
 	return result;
 }
 
-
 ///////////////////////////////////////////////////////////////////////
 /// \brief Parses the OPERATION token to determine the PORT and PIN assignment
 /// \param char* operation - The String token to be parsed
@@ -105,9 +83,57 @@ Terminal_ReturnStates Terminal_ReadSerialToCommandBuffer(TerminalBuffer *buffer)
 /// \return Terminal_ReturnState_OK, Terminal_ReturnState_InvalidPort,
 ///         Terminal_ReturnState_InvalidPin
 ///////////////////////////////////////////////////////////////////////
-Terminal_ReturnStates Terminal_ParseOperation(char *operation, TerminalCommand *cmd) {
+Terminal_ReturnStates Terminal_ParseOperation(uint8_t *operation,
+		TerminalCommand *cmd) {
 	Terminal_ReturnStates result = Terminal_ReturnState_OK;
 
+	uint_fast8_t lexicalState = LEXICAL_PORT;
+	uint_fast8_t tokenSize = sizeof(operation);
+	uint_fast8_t i;
+	uint8_t pInt = 0;
+	for (i = 0; i < tokenSize; i++) {
+		switch (lexicalState) {
+		case LEXICAL_PORT :
+			result = TerminalCommand_setPort(cmd, operation[i]);
+			lexicalState++;
+			break;
+		case LEXICAL_PIN :
+			if (operation[i] >= '0' && operation[i] <= '9') {
+				pInt = strtol((char*) operation + i, NULL, 10);
+				lexicalState = LEXICAL_END;
+			}
+			result = TerminalCommand_setPin(cmd, pInt);
+			break;
+		default:
+			break;
+		}
+		if (Terminal_ReturnState_OK != result) {
+			break;
+		}
+	}
+
+	return result;
+}
+
+uint_fast8_t isType(uint8_t ch) {
+	uint_fast8_t result = Terminal_ReturnState_OK;
+	char *pattern = "0123456789bBuUxX";
+	int i;
+	for (i = 0; i < 16; i++) {
+		if (pattern[i] == ch) {
+			return result;
+		}
+	}
+	return Terminal_ReturnState_InvalidType;
+}
+
+uint_fast8_t validValue(int8_t *value, char *span) {
+	uint_fast8_t result = Terminal_ReturnState_OK;
+	size_t dcount = strlen( (char*)value );
+	size_t spansize = strspn((char*)value, span);
+	if (dcount != spansize) {
+		result = Terminal_ReturnState_InvalidValue;
+	}
 	return result;
 }
 
@@ -121,19 +147,101 @@ Terminal_ReturnStates Terminal_ParseOperation(char *operation, TerminalCommand *
 ///         Terminal_ReturnState_TypeNotSet, Terminal_ReturnState_InvalidValue,
 ///         Terminal_ReturnState_MemoryError
 ///////////////////////////////////////////////////////////////////////
-Terminal_ReturnStates Terminal_ParseArgument(char *argument, TerminalCommand *cmd) {
+Terminal_ReturnStates Terminal_ParseArgument(uint8_t *argument,
+		TerminalCommand *cmd) {
 	Terminal_ReturnStates result = Terminal_ReturnState_OK;
+
+	uint_fast8_t lexicalState = LEXICAL_TYPE;
+	uint_fast8_t tokenSize = strlen((char*)argument);
+	uint_fast8_t i;
+	int8_t pValue = 0;
+	int8_t base = 10;
+	char *span = "1234567890";
+	for (i = 0; i < tokenSize; i++) {
+		switch (lexicalState) {
+		case LEXICAL_TYPE :
+			result = isType(argument[i]);
+			if (!(Terminal_ReturnState_OK == result)) {
+				return result;
+			}
+
+			if ('u' == argument[i] || 'U' == argument[i]) {
+				result = TerminalCommand_setType(cmd, Terminal_Unsigned_Type);
+			} else if ('x' == argument[i] || 'X' == argument[i]) {
+				span = "0123456789ABCDEF";
+				result = TerminalCommand_setType(cmd,
+						Terminal_Hexadecimal_Type);
+				base = 16;
+			} else if ('b' == argument[i] || 'B' == argument[i]) {
+				span = "01";
+				result = TerminalCommand_setType(cmd, Terminal_Binary_Type);
+				base = 2;
+			} else {
+				// result = TerminalCommand_addValueElement( argument[i]);
+				char *span = "1234567890";
+				if (Terminal_ReturnState_OK == validValue( (argument + 1), span)) {
+					pValue = strtol((char*) argument + i, NULL, base);
+					result = TerminalCommand_SetValue(cmd, pValue);
+					lexicalState = LEXICAL_END;
+				} else {
+					return Terminal_ReturnState_InvalidValue;
+				}
+			}
+			lexicalState++;
+			break;
+		case LEXICAL_VALUE :
+			if (Terminal_ReturnState_OK == validValue(argument + 1, span)) {
+				pValue = strtol((char*) argument + i, NULL, base);
+				result = TerminalCommand_SetValue(cmd, pValue);
+				lexicalState = LEXICAL_END;
+			} else {
+				return Terminal_ReturnState_InvalidValue;
+			}
+			break;
+		default:
+			break;
+		}
+		if (Terminal_ReturnState_OK != result) {
+			break;
+		}
+	}
 
 	return result;
 }
 
 ///////////////////////////////////////////////////////////////////////
-/// \brief
+/// \brief Parse the command buffer structure to populate the actual
+///        command structure with the information to be able to execute
+///        the operation using the argument.
+/// \param TerminalBuffer *buffer
+/// \param TerminalCommand *cmd
+///
+/// \return Terminal_ReturnState_OK
+///         Terminal_ReturnState_InvalidPort,
+///         Terminal_ReturnState_InvalidPin
+///         Terminal_ReturnState_InvalidType,
+///         Terminal_ReturnState_TypeNotSet, Terminal_ReturnState_InvalidValue,
+///         Terminal_ReturnState_MemoryError
 ///////////////////////////////////////////////////////////////////////
-Terminal_ReturnStates Terminal_ParseCommandBuffer(TerminalBuffer *buffer, TerminalCommand *cmd) {
+Terminal_ReturnStates Terminal_ParseCommandBuffer(TerminalBuffer *cmdBuffer,
+		TerminalCommand *cmd) {
 
 	Terminal_ReturnStates result = Terminal_ReturnState_OK;
-
+	int tokenId;
+	for (tokenId = 0; tokenId < cmdBuffer->size; tokenId++) {
+		switch (tokenId) {
+		case 0:
+			result = Terminal_ParseOperation(cmdBuffer->tokenBuffer[0], cmd);
+			break;
+		case 1:
+			result = Terminal_ParseArgument(cmdBuffer->tokenBuffer[1], cmd);
+			break;
+		default:
+			result = Terminal_ReturnState_TokenOverFlow;
+		}
+		if (Terminal_ReturnState_OK != result) {
+			break;
+		}
+	}
 	return result;
-
 }

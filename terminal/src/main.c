@@ -10,7 +10,7 @@
 #include "MCU/tick.h"
 
 
-#define TEST_BLOCK_5
+#define TEST_BLOCK_6
 
 
 #ifdef TEST_BLOCK_1
@@ -170,4 +170,50 @@ void main(void)
 		Led_Toggle(); // Toggle each byte
     }
 }
+#endif
+
+#ifdef TEST_BLOCK_6
+#include "TERMINAL/Terminal.h"
+/////////////////////////////////////////////////////////////////////////
+///	\brief The control loop for monitoring the USART and executing the
+/// send commands
+/////////////////////////////////////////////////////////////////////////
+
+void main(void) {
+
+    Led_Init();
+    Tick_init();
+
+    SerialPort2.Open(9600);
+
+    TerminalBuffer cmdBuffer;
+    TerminalCommand cmd;
+    uint_fast8_t result;
+
+    Terminal_Initialise(&cmdBuffer, &cmd);
+
+    for ( ;; )
+    {
+    	result = Terminal_ReadSerialToCommandBuffer(&cmdBuffer);
+    	switch( result ){
+    	case Terminal_ReturnState_Pending:
+    		// Do nothing. Wait for the next piece
+    		break;
+    	case Terminal_ReturnState_OK:
+    		result = Terminal_ParseCommandBuffer(&cmdBuffer, &cmd);
+    		if( Terminal_ReturnState_OK == result){
+    			// TODO Execute the command
+    			// TODO Send back acknowledgment
+    		    TerminalCommand_Initialise(&cmd);
+    		} else {
+    			// TODO Send back error
+    		}
+    		break;
+    	default:	// Error condition
+    		// TODO Send back an error
+    		break;
+    	}
+    }
+}
+
 #endif

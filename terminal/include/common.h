@@ -48,20 +48,21 @@
 	///	\brief	Defines the return states for the Terminal and Terminal_Buffer
 	/////////////////////////////////////////////////////////////////////////
     typedef enum Terminal_ReturnStates_Type {
-    	Terminal_ReturnState_OK,
-    	Terminal_ReturnState_NoMoreData,
-    	Terminal_ReturnState_IsWhiteSpace,
-    	Terminal_ReturnState_IsCarriageReturn,
-    	Terminal_ReturnState_Pending,
-    	Terminal_ReturnState_SerialError,
-    	Terminal_ReturnState_TokenTooBig,
-    	Terminal_ReturnState_TokenOverFlow,
-		Terminal_ReturnState_InvalidPort,
-		Terminal_ReturnState_InvalidPin,
-		Terminal_ReturnState_InvalidType,
-		Terminal_ReturnState_TypeNotSet,
-		Terminal_ReturnState_InvalidValue,
-		Terminal_ReturnState_MemoryError
+    	Terminal_ReturnState_OK,				// 0
+    	Terminal_ReturnState_NoMoreData,		// 1
+    	Terminal_ReturnState_IsWhiteSpace,		// 2
+    	Terminal_ReturnState_IsCarriageReturn,	// 3
+    	Terminal_ReturnState_Pending,			// 4
+    	Terminal_ReturnState_SerialError,		// 5
+    	Terminal_ReturnState_TokenTooBig,		// 6
+    	Terminal_ReturnState_TokenOverFlow,		// 7
+		Terminal_ReturnState_InvalidPort,		// 8
+		Terminal_ReturnState_InvalidPin,		// 9
+		Terminal_ReturnState_InvalidType,		// 10
+		Terminal_ReturnState_TypeNotSet,		// 11
+		Terminal_ReturnState_InvalidValue,		// 12
+		Terminal_ReturnState_MemoryError,		// 13
+		Terminal_ReturnState_InternalError		// 14
 
 
     } Terminal_ReturnStates;

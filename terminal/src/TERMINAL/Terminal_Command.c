@@ -40,10 +40,9 @@ void TerminalCommand_Initialise(TerminalCommand *cmd) {
 ///////////////////////////////////////////////////////////////////////
 Terminal_ReturnStates TerminalCommand_setPort(TerminalCommand *cmd,
 		uint8_t port) {
-	Terminal_ReturnStates result;
+	Terminal_ReturnStates result = Terminal_ReturnState_OK;
 	if ((port >= 'A' && port <= 'D') || port == 'F') {
 		cmd->port = port;
-		result = Terminal_ReturnState_OK;
 	} else {
 		result = Terminal_ReturnState_InvalidPort;
 	}
@@ -99,32 +98,37 @@ Terminal_ReturnStates TerminalCommand_setType(TerminalCommand *cmd,
 /// \return Terminal_ReturnState_OK
 ///	Terminal_ReturnState_InvalidValue
 ///////////////////////////////////////////////////////////////////////
-Terminal_ReturnStates TerminalCommand_addValueElement(TerminalCommand *cmd,
-		uint8_t ch) {
-	Terminal_ReturnStates result;
-	char *c;
-	if (Terminal_Null == cmd->dataType) {
-		return Terminal_ReturnState_TypeNotSet;
-	}
-	if ( Terminal_Binary_Type == cmd->dataType ){
-		if( !(ch >= '0' && ch <= '1')){
-			return Terminal_ReturnState_InvalidValue;
-		}
-	}
-	result = Terminal_ReturnState_OK;
-	int clen;
-	clen = strlen(cmd->argument) + 1;
-	if (!(c = malloc(clen))) {
-		return Terminal_ReturnState_MemoryError;
-	}
-	memset(c, '\0', clen);
-	strcpy(c + 1, cmd->argument);// Copy the existing string down one position
-	*c = ch;	// Prepend the string with the new ch
-	if ((clen - 1) > 0) {
-		free(cmd->argument);
-	}
-	cmd->argument = c;
+//Terminal_ReturnStates TerminalCommand_addValueElement(TerminalCommand *cmd,
+//		uint8_t ch) {
+//	Terminal_ReturnStates result;
+//	char *c;
+//	if (Terminal_Null == cmd->dataType) {
+//		return Terminal_ReturnState_TypeNotSet;
+//	}
+//	if ( Terminal_Binary_Type == cmd->dataType ){
+//		if( !(ch >= '0' && ch <= '1')){
+//			return Terminal_ReturnState_InvalidValue;
+//		}
+//	}
+//	result = Terminal_ReturnState_OK;
+//	int clen;
+//	clen = strlen(cmd->argument) + 1;
+//	if (!(c = malloc(clen))) {
+//		return Terminal_ReturnState_MemoryError;
+//	}
+//	memset(c, '\0', clen);
+//	strcpy(c + 1, cmd->argument);// Copy the existing string down one position
+//	*c = ch;	// Prepend the string with the new ch
+//	if ((clen - 1) > 0) {
+//		free(cmd->argument);
+//	}
+//	cmd->argument = c;
+//
+//	return result;
+//
+//}
 
-	return result;
-
+Terminal_ReturnStates TerminalCommand_SetValue(TerminalCommand *cmd, int8_t value){
+	cmd->value = value;
+	return Terminal_ReturnState_OK;
 }

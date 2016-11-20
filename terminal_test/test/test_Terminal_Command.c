@@ -121,92 +121,92 @@ void test_TerminalCommand_ParseTheBuffer_SetTheTypeWithInvalidValue() {
 
 }
 
-void test_TerminalCommand_AddValueElementBeforeTypeWillReturnError(){
-      TerminalCommand cmd;
-
-      TerminalCommand_Initialise( &cmd );
-
-      TEST_ASSERT_EQUAL_INT(0, cmd.port);
-      TEST_ASSERT_EQUAL_INT(0, cmd.pin);
-      TEST_ASSERT_EQUAL_INT(Terminal_Null, cmd.dataType);
-      TEST_ASSERT_EQUAL_STRING("", cmd.argument);
-
-      Terminal_ReturnStates result;
-
-      result = TerminalCommand_addValueElement( &cmd, '1');
-
-      TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_TypeNotSet, result);
-      TEST_ASSERT_EQUAL_INT(0, cmd.dataType);
-
-}
-
-void test_TerminalCommand_AddValueElementDefaultPath(){
-      TerminalCommand cmd;
-
-      TerminalCommand_Initialise( &cmd );
-
-      TEST_ASSERT_EQUAL_INT(0, cmd.port);
-      TEST_ASSERT_EQUAL_INT(0, cmd.pin);
-      TEST_ASSERT_EQUAL_INT(Terminal_Null, cmd.dataType);
-      TEST_ASSERT_EQUAL_STRING("", cmd.argument);
-
-      Terminal_ReturnStates result;
-
-      result = TerminalCommand_setType(&cmd, Terminal_Decimal_Type);
-      result = TerminalCommand_addValueElement( &cmd, '1');
-
-      TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_OK, result);
-      TEST_ASSERT_EQUAL_INT(Terminal_Decimal_Type, cmd.dataType);
-      TEST_ASSERT_EQUAL_STRING("1", cmd.argument);
-
-}
-
-void test_TerminalCommand_AddValueElementDigitsAreAddedLSB(){
-      TerminalCommand cmd;
-
-      TerminalCommand_Initialise( &cmd );
-
-      TEST_ASSERT_EQUAL_INT(0, cmd.port);
-      TEST_ASSERT_EQUAL_INT(0, cmd.pin);
-      TEST_ASSERT_EQUAL_INT(Terminal_Null, cmd.dataType);
-      TEST_ASSERT_EQUAL_STRING("", cmd.argument);
-
-      Terminal_ReturnStates result;
-
-      result = TerminalCommand_setType(&cmd, Terminal_Decimal_Type);
-      result = TerminalCommand_addValueElement( &cmd, '1');
-      result = TerminalCommand_addValueElement( &cmd, '2');
-      result = TerminalCommand_addValueElement( &cmd, '3');
-
-      TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_OK, result);
-      TEST_ASSERT_EQUAL_INT(Terminal_Decimal_Type, cmd.dataType);
-      TEST_ASSERT_EQUAL_STRING("321", cmd.argument);
-
-}
-
-
-
-void test_TerminalCommand_AddValueElementBinaryCanOnlyBe1and0(){
-      TerminalCommand cmd;
-
-      TerminalCommand_Initialise( &cmd );
-
-      TEST_ASSERT_EQUAL_INT(0, cmd.port);
-      TEST_ASSERT_EQUAL_INT(0, cmd.pin);
-      TEST_ASSERT_EQUAL_INT(Terminal_Null, cmd.dataType);
-      TEST_ASSERT_EQUAL_STRING("", cmd.argument);
-
-      Terminal_ReturnStates result;
-
-      result = TerminalCommand_setType(&cmd, Terminal_Binary_Type);
-      result = TerminalCommand_addValueElement( &cmd, '1');
-      TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_OK, result);
-      result = TerminalCommand_addValueElement( &cmd, '0');
-      TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_OK, result);
-      result = TerminalCommand_addValueElement( &cmd, '3');
-      TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_InvalidValue, result);
-
-      TEST_ASSERT_EQUAL_INT(Terminal_Binary_Type, cmd.dataType);
-      TEST_ASSERT_EQUAL_STRING("01", cmd.argument);
-
-}
+// void test_TerminalCommand_AddValueElementBeforeTypeWillReturnError(){
+//       TerminalCommand cmd;
+//
+//       TerminalCommand_Initialise( &cmd );
+//
+//       TEST_ASSERT_EQUAL_INT(0, cmd.port);
+//       TEST_ASSERT_EQUAL_INT(0, cmd.pin);
+//       TEST_ASSERT_EQUAL_INT(Terminal_Null, cmd.dataType);
+//       TEST_ASSERT_EQUAL_STRING("", cmd.argument);
+//
+//       Terminal_ReturnStates result;
+//
+//       result = TerminalCommand_addValueElement( &cmd, '1');
+//
+//       TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_TypeNotSet, result);
+//       TEST_ASSERT_EQUAL_INT(0, cmd.dataType);
+//
+// }
+//
+// void test_TerminalCommand_AddValueElementDefaultPath(){
+//       TerminalCommand cmd;
+//
+//       TerminalCommand_Initialise( &cmd );
+//
+//       TEST_ASSERT_EQUAL_INT(0, cmd.port);
+//       TEST_ASSERT_EQUAL_INT(0, cmd.pin);
+//       TEST_ASSERT_EQUAL_INT(Terminal_Null, cmd.dataType);
+//       TEST_ASSERT_EQUAL_STRING("", cmd.argument);
+//
+//       Terminal_ReturnStates result;
+//
+//       result = TerminalCommand_setType(&cmd, Terminal_Decimal_Type);
+//       result = TerminalCommand_addValueElement( &cmd, '1');
+//
+//       TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_OK, result);
+//       TEST_ASSERT_EQUAL_INT(Terminal_Decimal_Type, cmd.dataType);
+//       TEST_ASSERT_EQUAL_STRING("1", cmd.argument);
+//
+// }
+//
+// void test_TerminalCommand_AddValueElementDigitsAreAddedLSB(){
+//       TerminalCommand cmd;
+//
+//       TerminalCommand_Initialise( &cmd );
+//
+//       TEST_ASSERT_EQUAL_INT(0, cmd.port);
+//       TEST_ASSERT_EQUAL_INT(0, cmd.pin);
+//       TEST_ASSERT_EQUAL_INT(Terminal_Null, cmd.dataType);
+//       TEST_ASSERT_EQUAL_STRING("", cmd.argument);
+//
+//       Terminal_ReturnStates result;
+//
+//       result = TerminalCommand_setType(&cmd, Terminal_Decimal_Type);
+//       result = TerminalCommand_addValueElement( &cmd, '1');
+//       result = TerminalCommand_addValueElement( &cmd, '2');
+//       result = TerminalCommand_addValueElement( &cmd, '3');
+//
+//       TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_OK, result);
+//       TEST_ASSERT_EQUAL_INT(Terminal_Decimal_Type, cmd.dataType);
+//       TEST_ASSERT_EQUAL_STRING("321", cmd.argument);
+//
+// }
+//
+//
+//
+// void test_TerminalCommand_AddValueElementBinaryCanOnlyBe1and0(){
+//       TerminalCommand cmd;
+//
+//       TerminalCommand_Initialise( &cmd );
+//
+//       TEST_ASSERT_EQUAL_INT(0, cmd.port);
+//       TEST_ASSERT_EQUAL_INT(0, cmd.pin);
+//       TEST_ASSERT_EQUAL_INT(Terminal_Null, cmd.dataType);
+//       TEST_ASSERT_EQUAL_STRING("", cmd.argument);
+//
+//       Terminal_ReturnStates result;
+//
+//       result = TerminalCommand_setType(&cmd, Terminal_Binary_Type);
+//       result = TerminalCommand_addValueElement( &cmd, '1');
+//       TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_OK, result);
+//       result = TerminalCommand_addValueElement( &cmd, '0');
+//       TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_OK, result);
+//       result = TerminalCommand_addValueElement( &cmd, '3');
+//       TEST_ASSERT_EQUAL_INT(Terminal_ReturnState_InvalidValue, result);
+//
+//       TEST_ASSERT_EQUAL_INT(Terminal_Binary_Type, cmd.dataType);
+//       TEST_ASSERT_EQUAL_STRING("01", cmd.argument);
+//
+// }

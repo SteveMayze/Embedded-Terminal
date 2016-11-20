@@ -31,6 +31,7 @@ typedef struct {
 	uint8_t pin;
 	Terminal_DataType dataType;
 	char* argument;
+	int8_t value;
 
 } TerminalCommand;
 
@@ -83,5 +84,7 @@ Terminal_ReturnStates TerminalCommand_setType(TerminalCommand *cmd,
 ///////////////////////////////////////////////////////////////////////
 Terminal_ReturnStates TerminalCommand_addValueElement(TerminalCommand *cmd,
 		uint8_t ch);
+
+Terminal_ReturnStates TerminalCommand_SetValue(TerminalCommand *cmd, int8_t value);
 
 #endif /* INCLUDE_TERMINAL_TERMINAL_COMMAND_H_ */
